@@ -1,11 +1,16 @@
--- Script that creates a trigger that resets the attribute
--- valid_email only when the email has been changed.
+-- Script that creates a stored procedure AddBonus
+-- that adds a new correction for a student.
 DELIMITER $$ ;
-CREATE TRIGGER validate BEFORE UPDATE ON users
-FOR EACH ROW
+CREATE PROCEDURE AddBonus(
+	IN user_id INTEGER,
+	IN project_name VARCHAR(255),
+	IN score INTEGER
+)
 BEGIN
-	IF NEW.email != OLD.email THEN
-		SET NEW.valid_email = 0;
+	IF NOT EXISTS(SELECT name FROM projects WHERE name=project_name) THEN
+		INSERT INTO projects (name) VALUES (project_name);
 	END IF;
+	INSERT INTO corrections (user_id, project_id, score)
+	VALUES (user_id, (SELECT id from projects WHERE name=project_name), score);
 END;$$
-delimiter ;
+DELIMITER ;
